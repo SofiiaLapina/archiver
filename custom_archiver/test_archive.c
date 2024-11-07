@@ -1,3 +1,8 @@
+/**
+ * @file test_archive.c
+ * @brief Файл для тестування функціональності архіватора, включаючи шифрування, створення та вилучення архівів.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +16,11 @@
     #include <unistd.h>  // Для rmdir на Unix-подібних системах
 #endif
 
+/**
+ * @brief Тестує генерацію ключа з пароля за допомогою SHA-256.
+ * 
+ * Перевіряє, що однакові паролі генерують однаковий ключ.
+ */
 void test_generate_key_from_password() {
     unsigned char key1[32];
     unsigned char key2[32];
@@ -20,6 +30,11 @@ void test_generate_key_from_password() {
     printf("test_generate_key_from_password passed\n");
 }
 
+/**
+ * @brief Тестує створення та вилучення архіву.
+ * 
+ * Створює архів з файлів, а потім вилучає їх, перевіряючи, що витягнуті файли відповідають оригінальним.
+ */
 void test_create_and_extract_archive() {
     const char *input_files[] = { "testfile1.txt", "testfile2.txt" };
     const char *output_archive = "test_archive.zip";
@@ -73,6 +88,11 @@ void test_create_and_extract_archive() {
     printf("test_create_and_extract_archive passed\n");
 }
 
+/**
+ * @brief Тестує порівняння розмірів архіву з розмірами архівів, створених стандартними інструментами.
+ * 
+ * Створює архів, порівнює його розмір з архівом, створеним за допомогою tar, і видаляє архів після завершення тесту.
+ */
 void test_compare_with_standard_tools() {
     const char *input_files[] = { "testfile1.txt" };
     const char *output_archive = "test_archive.zip";
@@ -93,6 +113,13 @@ void test_compare_with_standard_tools() {
     printf("test_compare_with_standard_tools passed\n");
 }
 
+/**
+ * @brief Головна функція для запуску всіх тестів.
+ * 
+ * Запускає кожен тест і повідомляє про успіх після проходження всіх тестів.
+ * 
+ * @return int Код виходу: 0 при успіху.
+ */
 int main() {
     // Запускаємо всі тести
     test_generate_key_from_password();

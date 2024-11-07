@@ -1,3 +1,8 @@
+/**
+ * @file archive.c
+ * @brief Файл реалізації функцій архівування, шифрування та розархівації.
+ */
+
 #include "archive.h"
 #include "crypto.h"
 #include <stdio.h>
@@ -24,12 +29,37 @@
 #define IV_SIZE 16
 #define HASH_SIZE 32
 
-// Прототипи функцій
+/**
+ * @brief Додає файл до архіву.
+ * 
+ * @param filepath Шлях до файлу для додавання.
+ * @param base_path Базовий шлях для файлу в архіві.
+ * @param archive_file Вказівник на архівний файл.
+ * @param key Ключ для шифрування файлу.
+ * @return int Повертає 0 при успіху, інше значення при помилці.
+ */
 static int add_file(const char *filepath, const char *base_path, FILE *archive_file, const unsigned char *key);
-static int process_directory(const char *dirpath, const char *base_path, FILE *archive_file, const unsigned char *key);
-static int read_encrypted_data(FILE *file, unsigned char **data, int *data_len, unsigned char *key, unsigned char *iv);
-static int write_encrypted_data(FILE *file, unsigned char *data, int data_len, unsigned char *key, unsigned char *iv);
 
+/**
+ * @brief Рекурсивно обробляє каталог і додає його вміст до архіву.
+ * 
+ * @param dirpath Шлях до каталогу.
+ * @param base_path Базовий шлях для каталогу в архіві.
+ * @param archive_file Вказівник на архівний файл.
+ * @param key Ключ для шифрування файлів у каталозі.
+ * @return int Повертає 0 при успіху, інше значення при помилці.
+ */
+static int process_directory(const char *dirpath, const char *base_path, FILE *archive_file, const unsigned char *key);
+
+/**
+ * @brief Створює архів з файлів та каталогів.
+ * 
+ * @param input_paths Масив шляхів до файлів або каталогів.
+ * @param input_count Кількість файлів або каталогів.
+ * @param output_path Шлях до вихідного архівного файлу.
+ * @param key 256-бітний ключ для шифрування.
+ * @return int Повертає 0 при успіху, інше значення при помилці.
+ */
 int create_archive(const char **input_paths, size_t input_count, const char *output_path, const unsigned char *key) {
     FILE *archive_file = fopen(output_path, "wb");
     if (!archive_file) {
@@ -74,7 +104,15 @@ int create_archive(const char **input_paths, size_t input_count, const char *out
     return 0;
 }
 
-// Функція для додавання файлу до архіву
+/**
+ * @brief Додає файл до архіву.
+ * 
+ * @param filepath Шлях до файлу для додавання.
+ * @param relative_path Відносний шлях файлу в архіві.
+ * @param archive_file Вказівник на архівний файл.
+ * @param key Ключ для шифрування файлу.
+ * @return int Повертає 0 при успіху, інше значення при помилці.
+ */
 static int add_file(const char *filepath, const char *relative_path, FILE *archive_file, const unsigned char *key) {
     FILE *fp = fopen(filepath, "rb");
     if (!fp) {
@@ -141,7 +179,15 @@ static int add_file(const char *filepath, const char *relative_path, FILE *archi
     return 0;
 }
 
-// Функція для рекурсивної обробки директорії
+/**
+ * @brief Рекурсивно обробляє каталог і додає його вміст до архіву.
+ * 
+ * @param dirpath Шлях до каталогу.
+ * @param base_path Базовий шлях для каталогу в архіві.
+ * @param archive_file Вказівник на архівний файл.
+ * @param key Ключ для шифрування файлів у каталозі.
+ * @return int Повертає 0 при успіху, інше значення при помилці.
+ */
 static int process_directory(const char *dirpath, const char *base_path, FILE *archive_file, const unsigned char *key) {
     DIR *dir = opendir(dirpath);
     if (!dir) {
@@ -178,6 +224,14 @@ static int process_directory(const char *dirpath, const char *base_path, FILE *a
     return 0;
 }
 
+/**
+ * @brief Витягує файли з архіву.
+ * 
+ * @param archive_path Шлях до архівного файлу.
+ * @param extraction_path Директорія для збереження витягнутих файлів.
+ * @param key 256-бітний ключ для розшифрування.
+ * @return int Повертає 0 при успіху, інше значення при помилці.
+ */
 int extract_archive(const char *archive_path, const char *extraction_path, const unsigned char *key) {
     FILE *archive_file = fopen(archive_path, "rb");
     if (!archive_file) {
@@ -294,7 +348,12 @@ int extract_archive(const char *archive_path, const char *extraction_path, const
     return 0;
 }
 
-// Функція для отримання розміру файлу
+/**
+ * @brief Отримує розмір файлу.
+ * 
+ * @param filename Шлях до файлу.
+ * @return long Розмір файлу в байтах або -1 при помилці.
+ */
 long get_file_size(const char *filename) {
     struct stat st;
     if (stat(filename, &st) == 0) {
@@ -303,7 +362,13 @@ long get_file_size(const char *filename) {
     return -1;
 }
 
-// Функція для порівняння розмірів архівів з tar
+/**
+ * @brief Порівнює розмір архіву з розміром, створеним стандартним інструментом tar.
+ * 
+ * @param archive_path Шлях до архівного файлу.
+ * @param input_paths Масив шляхів до файлів або каталогів.
+ * @param input_count Кількість файлів або каталогів.
+ */
 void compare_with_standard_tools(const char *archive_path, const char **input_paths, size_t input_count) {
     char tar_command[1024];
     snprintf(tar_command, sizeof(tar_command), "tar -czf temp.tar.gz %s", input_paths[0]);

@@ -1,9 +1,27 @@
+/**
+ * @file main.c
+ * @brief Головний файл для роботи з архіватором: створення та вилучення архівів із шифруванням.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "archive.h"
 #include "crypto.h"
 
+/**
+ * @brief Головна функція для запуску програми архіватора.
+ * 
+ * Використання:
+ * - Створення архіву:
+ *   ./archive_tool -c "path\\to\\archive\\name.zip" "path\\to\\archive\\contents" -p <password> | -g <key>
+ * - Вилучення архіву:
+ *   ./archive_tool -x "path\\to\\archive\\name.zip" "path\\to\\the\\place\\where\\to\\extract\\the\\archive" -p <password> | -g <key>
+ * 
+ * @param argc Кількість аргументів командного рядка.
+ * @param argv Масив аргументів командного рядка.
+ * @return int Код виходу: 0 при успіху, 1 при помилці.
+ */
 int main(int argc, char *argv[]) {
     if (argc < 3) {
         fprintf(stderr, "Usages:\n");
@@ -15,7 +33,7 @@ int main(int argc, char *argv[]) {
     }
 
     const char *mode = argv[1];
-    unsigned char key[32]; // 256-бітний ключ
+    unsigned char key[32]; ///< 256-бітний ключ
     int key_provided = 0;
     int i = 2;
     const char *output_archive = NULL;
@@ -77,7 +95,7 @@ int main(int argc, char *argv[]) {
 
         printf("Archive created successfully: %s\n", output_archive);
 
-        // Порівняння розміру архіву зі стандартними інструментами ( tar)
+        // Порівняння розміру архіву зі стандартними інструментами (tar)
         compare_with_standard_tools(output_archive, input_paths, input_count);
 
     } else if (strcmp(mode, "-x") == 0) {
